@@ -1,0 +1,50 @@
+# Publishes ShipTrim to GitHub Pages.
+#
+# `configure-pages` with `enablement: true` turns Pages on using the workflow's
+# own token, so the site can be set up entirely from the repository -- no
+# personal access token, no manual step in Settings.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # Assemble explicitly instead of uploading the repo root, so .git and
+      # the workflow itself never reach the published site.
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -R index.html app.js styles.css vendor samples LICENSE _site/
+          touch _site/.nojekyll          # serve files verbatim, no Jekyll
+          du -sh _site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

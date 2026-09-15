@@ -5,6 +5,8 @@ Amazon sellers.** Drop in the label PDF your marketplace gave you and get back a
 compact, print-ready sheet — labels detected, cropped, paired with their
 invoices and packed onto A4.
 
+**[Try it → kkeyxxvii.github.io/ShipTrim](https://kkeyxxvii.github.io/ShipTrim/)**
+
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-1248A6)](LICENSE)
 ![no build step](https://img.shields.io/badge/build-none-1248A6)
 ![runs offline](https://img.shields.io/badge/runs-offline-1248A6)
@@ -15,7 +17,10 @@ backend to trust, and the tool works with the network switched off.
 
 ## Quick start
 
-No build step, no dependencies to install. Clone it and serve the folder:
+The hosted copy at **<https://kkeyxxvii.github.io/ShipTrim/>** is the same static
+files served over HTTPS — it still does all the work in your browser and still
+sends nothing anywhere. To run it yourself instead, clone it and serve the
+folder; there is no build step and nothing to install:
 
 ```bash
 git clone https://github.com/kkeyxxvii/ShipTrim.git
