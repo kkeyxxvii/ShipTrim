@@ -1,0 +1,186 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShipTrim</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="%231248a6"/><g fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round"><rect x="5.5" y="4" width="13" height="16" rx="2"/><path d="M8.5 8v3M11 8v3M13.5 8v3M16 8v3"/><path d="M5.5 14.6h13" stroke-dasharray="2 2"/><path d="M9 17.4h6"/></g></svg>'>
+<link rel="stylesheet" href="styles.css" charset="utf-8">
+<script src="vendor/pdf.min.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
+
+<header class="topbar">
+  <div class="logo" aria-hidden="true">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.6" y="2.9" width="14.8" height="18.2" rx="2.4"/>
+      <path d="M8 7.2v3.4M10.7 7.2v3.4M13.4 7.2v3.4M16 7.2v3.4"/>
+      <path d="M4.6 14.4h14.8" stroke-dasharray="2.1 2.1"/>
+      <path d="M8.6 17.6h6.8"/>
+    </svg>
+  </div>
+  <div class="brand">
+    <h1>Ship<em>Trim</em></h1>
+    <p>Universal shipping label cropper &amp; A4 formatter</p>
+  </div>
+  <div class="spacer"></div>
+  <span class="pill">100% on-device · nothing uploaded</span>
+  <button class="ghost-btn" id="resetBtn">Start over</button>
+</header>
+
+<main class="shell">
+  <!-- ── LEFT: controls ─────────────────────────────────────────── -->
+  <section>
+    <div class="card">
+      <div class="card-hd"><span class="step-no">1</span><h2>Upload PDF</h2></div>
+      <div class="card-bd">
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Upload a shipping label PDF">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v13"/>
+          </svg>
+          <b>Drop your label PDF here</b>
+          <span>or <span class="browse">browse files</span> · multi-page bulk PDFs welcome</span>
+        </div>
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
+        <div id="fileCard" class="filecard hidden" style="margin-top:14px">
+          <div class="ficon">PDF</div>
+          <div class="grow">
+            <div class="fname" id="fName">—</div>
+            <div class="fmeta"><span id="fPages">—</span><i>·</i><span id="fSize">—</span><i>·</i><span id="fDims">—</span></div>
+          </div>
+          <button class="ghost-btn" id="changeBtn">Change</button>
+        </div>
+        <div id="loadErr" class="notice err hidden" style="margin-top:12px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          <span id="loadErrMsg"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="step-no">2</span><h2>Marketplace</h2><span class="sub" id="detBadge"></span></div>
+      <div class="card-bd">
+        <div class="plat-grid" id="platGrid"></div>
+        <p class="hint" id="platHint">Auto Detect reads the document’s text and structure, then applies that marketplace’s crop rules.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><span class="step-no">3</span><h2>Invoice &amp; output</h2></div>
+      <div class="card-bd">
+        <div class="seg-row">
+          <div class="field">
+            <label>Invoice</label>
+            <div class="seg" id="segInvoice">
+              <button data-v="without" aria-pressed="true">Without invoice</button>
+              <button data-v="with" aria-pressed="false">With invoice</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Output format</label>
+            <div class="seg" id="segMode">
+              <button data-v="a4" aria-pressed="true">A4 mode</button>
+              <button data-v="label" aria-pressed="false">Label mode</button>
+            </div>
+          </div>
+        </div>
+        <p class="hint" id="modeHint"></p>
+      </div>
+      <details class="adv">
+        <summary><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg> Advanced layout controls</summary>
+        <div class="adv-bd">
+          <div class="row">
+            <span class="lb">Page margin<small>Outer white space on the A4 sheet</small></span>
+            <input type="range" id="optMargin" min="0" max="20" step="1" value="8"><span class="val" id="valMargin">8 mm</span>
+          </div>
+          <div class="row">
+            <span class="lb">Gap between units<small>Spacing between adjacent labels</small></span>
+            <input type="range" id="optGap" min="0" max="12" step="1" value="4"><span class="val" id="valGap">4 mm</span>
+          </div>
+          <div class="row">
+            <span class="lb">Invoice size<small>Share of the unit given to the invoice</small></span>
+            <input type="range" id="optInv" min="20" max="70" step="4" value="32"><span class="val" id="valInv">32%</span>
+          </div>
+          <div class="row">
+            <span class="lb">Crop padding<small>Safety bleed kept around detected content</small></span>
+            <input type="range" id="optPad" min="0" max="10" step="1" value="3"><span class="val" id="valPad">3 pt</span>
+          </div>
+          <div class="row">
+            <span class="lb">Cut guides<small>Faint dashed lines between units</small></span>
+            <button class="switch" id="optGuides" aria-pressed="true"><i></i></button>
+          </div>
+          <div class="row">
+            <span class="lb">Force units per A4 page<small>Auto picks the densest readable fit</small></span>
+            <select id="optForce" style="padding:6px 9px;border:1px solid var(--line-2);border-radius:8px;background:#fff;font:inherit;font-size:12.5px">
+              <option value="auto">Auto</option><option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="4">4</option><option value="6">6</option><option value="8">8</option>
+            </select>
+          </div>
+        </div>
+      </details>
+      <div class="card-bd" style="border-top:1px solid var(--line);background:var(--surface-2)">
+        <button class="btn btn-primary btn-lg" id="runBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 12.5h6L11 22l8.5-10.5h-6L13 2z"/></svg>
+          <span id="runLabel">Detect &amp; build layout</span>
+        </button>
+        <div class="progress hidden" id="progress">
+          <div class="plabel"><span id="pMsg">Working…</span><span id="pPct"></span></div>
+          <div class="bar" id="pBar"><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="detCard">
+      <div class="card-hd"><h2>Detected regions</h2><span class="sub" id="detSub"></span></div>
+      <div class="card-bd">
+        <div id="detWarn" class="notice warn hidden" style="margin-bottom:12px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3l9-16z"/><path d="M12 9v4M12 17h.01"/></svg>
+          <span id="detWarnMsg"></span>
+        </div>
+        <div class="det">
+          <table>
+            <thead><tr><th>#</th><th>Src page</th><th>Label crop</th><th>Invoice</th><th>Order ref</th></tr></thead>
+            <tbody id="detBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RIGHT: preview ─────────────────────────────────────────── -->
+  <section class="sticky-col">
+    <div class="card">
+      <div class="card-hd">
+        <h2>Layout preview</h2>
+        <span class="sub" id="pvSub">Live</span>
+        <div style="flex:1"></div>
+        <button class="ghost-btn hidden" id="pvPrev">‹</button>
+        <span class="sub hidden" id="pvNav">1 / 1</span>
+        <button class="ghost-btn hidden" id="pvNext">›</button>
+      </div>
+      <div id="resultBox" class="card-bd hidden">
+        <div class="headline" id="headline"></div>
+        <div class="summary" id="summary"></div>
+        <div class="hint hidden" id="invNote" style="margin-top:10px"></div>
+      </div>
+      <div class="preview-wrap">
+        <div id="pvEmpty" class="empty">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>
+          </svg>
+          <b>No layout yet</b>
+          <p>Upload a Flipkart, Meesho or Amazon label PDF and run detection — the packed sheets will render here before you download.</p>
+        </div>
+        <div id="sheets" class="sheet-scroll hidden"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="dockbar">
+  <div class="dsum" id="dockSum">Upload a PDF to begin — files never leave your browser.</div>
+  <button class="btn btn-sec" id="printBtn" disabled>Print</button>
+  <button class="btn btn-primary" id="dlBtn" disabled>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+    Download PDF
+  </button>
+</div>
+
+<script src="app.js" charset="utf-8"></script>

@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# editor / tooling
+.claude/
+.vscode/
+.idea/
+
+# node (only used to refresh vendor/ or generate samples)
+node_modules/
+package-lock.json
+
+# scratch output from local testing
+.tmpout/
+*.out.pdf
+
+# never commit real label PDFs: they carry customer names and addresses
+/real-*.pdf
+/orders/
